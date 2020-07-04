@@ -1,6 +1,7 @@
 package com.example.spacehunter;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -11,6 +12,14 @@ import androidx.annotation.NonNull;
 
 // this is the screen of your device.
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
+
+    // Set the screen width and height in our game panel.
+    public static final int WIDTH = 856;
+    public static final int HEIGHT = 480;
+
+    // Need reference to the background class so that two classes can communicate.
+    private Background bg; // we create the body of the background class inside GamePanel inside surface created method.
+
 
     // The thread reference
     private MainThread thread;
@@ -43,6 +52,15 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     // This is called immediately after the surface is first created.
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
+
+        // create object in surface created.
+        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.background)); // background is our png image.
+
+        //lets set out dx -5 so our bg image slowly moves off the screen with -5 speed.
+        // To do so we use the setVectir method from background class.
+        bg.setVector(-5);
+
+
         // start the game loop
         thread.setRunning(true);
         thread.start();
@@ -76,7 +94,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     // Update Method.
     public void update() {
-
-    }
+        bg.update();
+    } // end of GamePanel update()
 
 } // end of gamePanel class
