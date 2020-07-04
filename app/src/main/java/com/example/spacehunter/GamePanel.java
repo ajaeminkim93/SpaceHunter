@@ -55,7 +55,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
 
         // create object in surface created.
-        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.background)); // background is our png image.
+        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.backgroundspace)); // background is our png image.
 
         //lets set out dx -5 so our bg image slowly moves off the screen with -5 speed.
         // To do so we use the setVectir method from background class.
@@ -105,8 +105,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void draw(Canvas canvas) {
 
         // need to scale our images for all devices and screens.
-        final float scaleFactorX = getWidth()/WIDTH;
-        final float scaleFactorY = getHeight()/HEIGHT;
+        final float scaleFactorX = getWidth()/(WIDTH*1.f);
+        final float scaleFactorY = getHeight()/(HEIGHT*1.f);
 
         if(canvas != null) {
             final int savedState = canvas.save();
