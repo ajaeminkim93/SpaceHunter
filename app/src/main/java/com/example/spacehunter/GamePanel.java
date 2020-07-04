@@ -2,6 +2,7 @@ package com.example.spacehunter;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -94,7 +95,33 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     // Update Method.
     public void update() {
-        bg.update();
+        bg.update(); // calls background's update
     } // end of GamePanel update()
+
+
+
+    // creating GamePanel's draw() method.
+    @Override
+    public void draw(Canvas canvas) {
+
+        // need to scale our images for all devices and screens.
+        final float scaleFactorX = getWidth()/WIDTH;
+        final float scaleFactorY = getHeight()/HEIGHT;
+
+        if(canvas != null) {
+            final int savedState = canvas.save();
+            canvas.scale(scaleFactorX, scaleFactorY);
+            bg.draw(canvas);
+            canvas.restoreToCount(savedState);
+        }
+
+
+
+
+
+
+    } // end of the draw method
+
+
 
 } // end of gamePanel class
