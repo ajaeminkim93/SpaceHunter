@@ -12,6 +12,8 @@ public class Background {
     public Background(Bitmap res) {
         // set image to the result in the background class
         image = res;
+        // set movement speed of the background
+        dx = GamePanel.MOVESPEED;
 
     } // end of constructor
 
@@ -43,9 +45,9 @@ public class Background {
 
     // new method for dx
     // we need a method to check the value of the new x coordinate
-    public void setVector(int dx) {
-        this.dx = dx;
-    }
+    //public void setVector(int dx) {
+    //    this.dx = dx;
+    //}
 
 
 } // end of background class

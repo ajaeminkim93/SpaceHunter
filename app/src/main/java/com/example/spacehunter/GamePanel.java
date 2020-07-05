@@ -18,9 +18,13 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public static final int WIDTH = 856;
     public static final int HEIGHT = 480;
 
+    public static final int MOVESPEED = -5;
+
     // Need reference to the background class so that two classes can communicate.
     private Background bg; // we create the body of the background class inside GamePanel inside surface created method.
 
+    //test
+    private Background bgAlt;
 
     // The thread reference
     private MainThread thread;
@@ -55,11 +59,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
 
         // create object in surface created.
-        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.backgroundspace)); // background is our png image.
-
+        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.backgroundspacee)); // background is our png image.
+        //bgAlt = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.backgroundspace));
         //lets set out dx -5 so our bg image slowly moves off the screen with -5 speed.
-        // To do so we use the setVectir method from background class.
-        bg.setVector(-5);
+        // To do so we use the setVector method from background class.
+        //bg.setVector(-3);
 
 
         // start the game loop
@@ -105,19 +109,16 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void draw(Canvas canvas) {
 
         // need to scale our images for all devices and screens.
-        final float scaleFactorX = getWidth()/(WIDTH*1.f);
-        final float scaleFactorY = getHeight()/(HEIGHT*1.f);
+        super.draw(canvas);
+        final float scaleFactorX = getWidth() / (WIDTH * 1.f);
+        final float scaleFactorY = getHeight() / (HEIGHT * 1.f);
 
-        if(canvas != null) {
+        if (canvas != null) {
             final int savedState = canvas.save();
             canvas.scale(scaleFactorX, scaleFactorY);
             bg.draw(canvas);
             canvas.restoreToCount(savedState);
         }
-
-
-
-
 
 
     } // end of the draw method
