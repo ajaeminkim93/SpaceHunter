@@ -30,7 +30,7 @@ public abstract class GameObject {
         return y;
     }
 
-    // dont needd setters for height and width because they are already defined with Gimp
+    // dont need setters for height and width because they are already defined with Gimp
     public int getHeight() {
         return height;
     }
