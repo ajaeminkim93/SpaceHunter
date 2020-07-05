@@ -29,7 +29,7 @@ public class Hero extends GameObject { // hero extends the game object class
 
 
     // we need reference to the bitmap. with and height of frames, and number of frames.
-    public Hero(Bitmap res, int w, int h, int b, int numFrames) {
+    public Hero(Bitmap res, int w, int h, int numFrames) {
         // when the game starts the hero is created to the left (100x) and in the middle (HEIGHT/2)
         x = 100;
         y = GamePanel.HEIGHT / 2;
@@ -89,11 +89,11 @@ public class Hero extends GameObject { // hero extends the game object class
         }
 
         // set speed limit
-        if(dy > 14) {
-            dy = 14;
+        if(dy > 6) {
+            dy = 6;
         }
-        if(dy <= -14) {
-            dy = -14;
+        if(dy < -6) {
+            dy = -6;
         }
 
         y += dy * 2;

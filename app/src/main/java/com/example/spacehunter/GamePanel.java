@@ -22,6 +22,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     // Need reference to the background class so that two classes can communicate.
     private Background bg; // we create the body of the background class inside GamePanel inside surface created method.
+    // Need reference to the hero class so that the two classes can communicate.
+    private Hero hero;
+
 
     //test
     private Background bgAlt;
@@ -65,6 +68,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         // To do so we use the setVector method from background class.
         //bg.setVector(-3);
 
+        hero = new Hero(BitmapFactory.decodeResource(getResources(), R.drawable.hero), 30, 45, 3);
+
 
         // start the game loop
         thread.setRunning(true);
@@ -93,13 +98,31 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     // know if we touch the screen or not.
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        if(event.getAction() == MotionEvent.ACTION_DOWN) { // pressing down?
+            if(!hero.getPlaying()) {
+                hero.setPlaying(true);
+            } else {
+                hero.setUp(true);
+            }
+            return true;
+        }
+        if(event.getAction() == MotionEvent.ACTION_UP) { // release screen press?
+            hero.setUp(false);
+            return true;
+        }
+
         return super.onTouchEvent(event);
     }
 
     // Update Method.
     public void update() {
-        bg.update(); // calls background's update
+        if(hero.getPlaying()) {
+            bg.update(); // calls background's update
+            hero.update(); // calls hero's update
+        }
     } // end of GamePanel update()
 
 
@@ -117,6 +140,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             final int savedState = canvas.save();
             canvas.scale(scaleFactorX, scaleFactorY);
             bg.draw(canvas);
+            hero.draw(canvas);
             canvas.restoreToCount(savedState);
         }
 
