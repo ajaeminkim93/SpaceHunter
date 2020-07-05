@@ -10,6 +10,7 @@ public class Hero {
 
     private int score;
 
+    // y value very time we touch the screen
     private double dya;
 
     // is hero going up or down
