@@ -13,7 +13,7 @@
 
             android:screenOrientation="landscape"
 
-            android:name=".MainActivity"
+            android:name=".Splash"
 
 
             >
@@ -23,6 +23,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:label="SpaceHunter"
+            android:screenOrientation="landscape" />
+
+
+
     </application>
 
 </manifest>
