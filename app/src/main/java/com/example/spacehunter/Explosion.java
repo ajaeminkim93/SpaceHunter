@@ -1,12 +1,58 @@
 package com.example.spacehunter;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-public class Explosion {
+public class Explosion extends GameObject {
 
-    public Explosion(){}
+    // Variables
+    private int x;
+    private int y;
+    private int width;
+    private int height;
+    private int row;
+    private Animation animation = new Animation();
+    private Bitmap spritesheet;
 
-    public void update(){}
 
-    public void draw(Canvas canvas){}
+
+
+    public Explosion(Bitmap res, int x, int y, int w, int h, int numFrames ) {
+        this.x = x;
+        this.y = y;
+        this.width = w;
+        this.height = h;
+
+        Bitmap[] image = new Bitmap[numFrames];
+
+        spritesheet = res;
+
+        for(int i = 0; i < image.length; i++) {
+            if(i % 4 == 0 && i > 0){
+                row++;
+            }
+            image[i] = Bitmap.createBitmap(spritesheet, (i - (4 * row)) * width, row * height, width, height);
+        }
+
+        animation.setFrames(image);
+        animation.setDelay(5);
+
+    }
+
+    public void update() {
+        // want it to only happen once.
+        if(!animation.isPlayedOnce()) {
+            animation.update();
+        }
+    }
+
+    public void draw(Canvas canvas) {
+        if(!animation.isPlayedOnce()) {
+            canvas.drawBitmap(animation.getImage(), x, y, null);
+        }
+    }
+
+    public int getHeight() {
+        return height;
+    }
 }

@@ -43,6 +43,18 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private ArrayList<Enemy> alien;
     private long alienStartTime;
 
+    // BORDER
+    private ArrayList<Borderbottom> botborder;
+    private long borderStartTime;
+    private ArrayList<Bordertop> topborder;
+
+    // Obstacle
+    private  ArrayList<Obstacle> obstacle;
+    private long obstacleStartTime;
+
+
+
+
 
     //test
     private Background bgAlt;
@@ -96,6 +108,15 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         alien = new ArrayList<Enemy>();
         alienStartTime = System.nanoTime();
 
+        // create borders
+        botborder = new ArrayList<Borderbottom>();
+        topborder = new ArrayList<Bordertop>();
+        borderStartTime = System.nanoTime();
+
+        // create obstacle
+        obstacle = new ArrayList<Obstacle>();
+        obstacleStartTime = System.nanoTime();
+
         // start the game loop
         thread.setRunning(true);
         thread.start();
@@ -148,6 +169,70 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             bg.update(); // calls background's update
             hero.update(); // calls hero's update
 
+            // obstacle update // bottom border update ===================================================================================
+            long obstacleElapsed = (System.nanoTime() - obstacleStartTime)/1000000;
+
+            if(obstacleElapsed > (15000 - hero.getScore()/4)) {
+                obstacle.add(new Obstacle(BitmapFactory.decodeResource(getResources(), R.drawable.obstacle), WIDTH + 10, HEIGHT -290 + rand.nextInt(150), 90, 300, hero.getScore(), 1));
+                obstacleStartTime = System.nanoTime();
+            }
+
+            for(int i = 0; i < obstacle.size(); i++) {
+                obstacle.get(i).update();
+                if(collision(obstacle.get(i), hero)) {
+                    hero.setPlaying(false);
+                }
+                break;
+            }
+
+
+            // bottom border update ===================================================================================
+            long borderElapsed = (System.nanoTime()-borderStartTime)/1000000;
+
+            if(borderElapsed >100 ) {
+                botborder.add(new Borderbottom(BitmapFactory.decodeResource(getResources(), R.drawable.borderbottom), WIDTH + 10, ((HEIGHT -80)+rand.nextInt(10))));
+                //topborder.add(new Bordertop(BitmapFactory.decodeResource(getResources(), R.drawable.bordertop), WIDTH + 10, ((HEIGHT -80)+rand.nextInt(10)), HEIGHT));
+                //reset timer
+                borderStartTime = System.nanoTime();
+
+
+            }//end if
+
+            //loop through every border block and check collision and remove
+            for(int i = 0; i<botborder.size();i++) {
+                //update obstacle
+                botborder.get(i).update();
+
+                if (collision(botborder.get(i), hero)) {
+                    hero.setPlaying(false);
+                    break;
+                }
+
+                //if statement to remove border if is of the screen limits
+                if( botborder.get(i).getX()< -20)
+                {
+                    botborder.remove(i);
+                }
+            }//end of bot border
+            //loop through every border block and check collision and remove
+            /*
+            for(int i = 0; i<topborder.size();i++) {
+                //update obstacle
+                topborder.get(i).update();
+
+                if (collision(topborder.get(i), hero)) {
+                    hero.setPlaying(false);
+                    break;
+                }
+
+                //if statement to remove border if is of the screen limits
+                if( topborder.get(i).getX()< -20)
+                {
+                    topborder.remove(i);
+                }
+            }//end of top border*/
+
+
             // bullet update ====================================================================================================
             long bulletTimer = (System.nanoTime() - bulletStartTime)/1000000;
 
@@ -176,7 +261,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             // spawn first enemy in 10 seconds and then more often later
             if(alienTimer > (10000 - hero.getScore()/4)) {
 
-                alien.add(new Enemy(BitmapFactory.decodeResource(getResources(), R.drawable.enemy), WIDTH + 10, (int) (rand.nextDouble() * (HEIGHT - 50)), 40, 60, hero.getScore(), 3));
+                alien.add(new Enemy(BitmapFactory.decodeResource(getResources(), R.drawable.enemy), WIDTH + 10, (int) (rand.nextDouble() * (HEIGHT - 35)), 40, 60, hero.getScore(), 3));
 
                 // reset timer
                 alienStartTime = System.nanoTime();
@@ -259,6 +344,18 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 aln.draw(canvas);
             }
 
+            for(Obstacle obst: obstacle) {
+                obst.draw(canvas);
+            }
+
+            // draw bottom border
+            for(Borderbottom brb: botborder) {
+                brb.draw(canvas);
+            }
+            // draw top border
+            //for(Bordertop tpb: topborder) {
+            //    tpb.draw(canvas);
+            //}
 
             canvas.restoreToCount(savedState);
         }
