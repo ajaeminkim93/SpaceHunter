@@ -3,7 +3,10 @@ package com.example.spacehunter;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -52,6 +55,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private  ArrayList<Obstacle> obstacle;
     private long obstacleStartTime;
 
+    // Explosion
+    private Explosion explosion;
+
+    // best score?
+    private int best;
 
 
     // The thread reference
@@ -280,7 +288,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
             // spawn first enemy in 10 seconds and then more often later
             if(alienTimer > (10000 - hero.getScore()/4)) {
-
                 alien.add(new Enemy(BitmapFactory.decodeResource(getResources(), R.drawable.enemy), WIDTH + 10, (int) (rand.nextDouble() * (HEIGHT - 35)), 40, 60, hero.getScore(), 3));
 
                 // reset timer
@@ -303,12 +310,20 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                     break;
                 } // end of alien hero collision
 
+                // collision with bullet
                for(int j = 0; j < bullet.size(); j++) {
                    if(collision(alien.get(i), bullet.get(j))) {
+
+                       explosion = new Explosion(BitmapFactory.decodeResource(getResources(), R.drawable.explosion), alien.get(i).getX(), alien.get(i).getY(), 125, 100, 12);
+
                        alien.remove(i);
                        bullet.remove(j);
+
+                       best += 30;
+
                        break;
                    }
+                   explosion.update();
                    bullet.get(j).update();
                } // end of alien bullet collision
 
@@ -326,8 +341,13 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 startReset = System.nanoTime();
                 reset = true;
                 disappear = true;
+
+
+                // initiate explosion
+                explosion = new Explosion(BitmapFactory.decodeResource(getResources(), R.drawable.explosion), hero.getX(), hero.getY(), 125, 100, 12);
             }
 
+            explosion.update();
 
             // else reset game
             long resetElapsed = (System.nanoTime() - startReset)/1000000;
@@ -393,6 +413,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 brb.draw(canvas);
             }
 
+            if(started) {
+                explosion.draw(canvas);
+            }
+
+            drawText(canvas);
+
             canvas.restoreToCount(savedState);
         }
 
@@ -415,5 +441,17 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     } // end of newGame() method
 
+
+    public void drawText(Canvas canvas) {
+
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(30);
+
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        canvas.drawText("Distance: " + (hero.getScore()*2), 10, HEIGHT - 10, paint);
+        canvas.drawText("Score: " + best, WIDTH - 215, HEIGHT - 10, paint);
+
+    } // end of drawText()
 
 } // end of gamePanel class

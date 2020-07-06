@@ -39,13 +39,13 @@ public class MainActivity extends AppCompatActivity {
         // Step3: Create Buttons
         // Button 1
         Button buttonOne = new Button(this );
-        buttonOne.setText("Button1");
-        buttonOne.setId(123456); // Set an ID for the button because the default new buttons have the same id number.
+        //buttonOne.setText("Button1");
+        //buttonOne.setId(123456); // Set an ID for the button because the default new buttons have the same id number.
 
         // Button 2
         Button buttonTwo = new Button(this );
-        buttonTwo.setText("Button2");
-        buttonTwo.setId(789111); // Set an ID for the button because the default new buttons have the same id number.
+        //buttonTwo.setText("Button2");
+        //buttonTwo.setId(789111); // Set an ID for the button because the default new buttons have the same id number.
 
         // Step4: Add buttons to relative layout.
         // Since now we have two different buttons. We need to add them into the Relative Layout with the help of the
@@ -66,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
         GameButtons.setLayoutParams(params);
 
         // Then add buttons to this layout
-        GameButtons.addView(buttonOne);
-        GameButtons.addView(buttonTwo);
+        //GameButtons.addView(buttonOne);
+        //GameButtons.addView(buttonTwo);
 
         // Up until here we created 2 buttons in a RelativeLayout but we dont know exactly where we place them.
         // So now we define where for button 1
