@@ -57,6 +57,18 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     // The thread reference
     private MainThread thread;
 
+    //Variables to reset teh game
+    private boolean newGameCreated;
+
+    private long startReset;
+
+    private boolean reset;
+
+    private boolean disappear;
+
+    private boolean started;
+
+
 
 
 
@@ -130,17 +142,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
         boolean retry = true;
-
+        int counter = 0;
         // The join() method is used to hold the execution of the currently running thread until
         // the specified thread is dead.
-        while(retry) {
+        while(retry && counter < 1000) {
             try {
                 thread.setRunning(false);
                 thread.join();
+                retry = false;
                 thread = null;
             } catch(InterruptedException e) {
                 e.printStackTrace();
             }
+            counter++;
         }
     }
 
@@ -149,9 +163,15 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public boolean onTouchEvent(MotionEvent event) {
 
         if(event.getAction() == MotionEvent.ACTION_DOWN) { // pressing down?
-            if(!hero.getPlaying()) {
+            if(!hero.getPlaying() && newGameCreated && reset) {
                 hero.setPlaying(true);
-            } else {
+                hero.setUp(true);
+            }
+            if(hero.getPlaying()) {
+                if(!started) {
+                    started = true;
+                }
+                reset = false;
                 hero.setUp(true);
             }
             return true;
@@ -298,7 +318,26 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                     break;
                 }
             } // end of the enemy
-        } // end of if playing
+        } // end of if playing if
+        else {
+            hero.resetDYA();
+            if(!reset) {
+                newGameCreated = false;
+                startReset = System.nanoTime();
+                reset = true;
+                disappear = true;
+            }
+
+
+            // else reset game
+            long resetElapsed = (System.nanoTime() - startReset)/1000000;
+
+            if(resetElapsed > 2000 && !newGameCreated) {
+                newGame();
+            }
+
+
+        }// end of if playing else
     } // end of GamePanel update()
 
 
@@ -332,8 +371,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             bg.draw(canvas);
 
             // draw hero
-            hero.draw(canvas);
-
+            if(!disappear) {
+                hero.draw(canvas);
+            }
             // draw enemy
             for(Bullet fp: bullet) {
                 fp.draw(canvas);
@@ -352,10 +392,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             for(Borderbottom brb: botborder) {
                 brb.draw(canvas);
             }
-            // draw top border
-            //for(Bordertop tpb: topborder) {
-            //    tpb.draw(canvas);
-            //}
 
             canvas.restoreToCount(savedState);
         }
@@ -363,6 +399,21 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     } // end of the draw method
 
+    public void newGame() {
+
+        disappear = false;
+        alien.clear();
+        obstacle.clear();
+        botborder.clear();
+        bullet.clear();
+
+        hero.resetDYA();
+        hero.resetScore();
+        hero.setY(HEIGHT/2);
+
+        newGameCreated = true;
+
+    } // end of newGame() method
 
 
 } // end of gamePanel class
