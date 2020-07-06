@@ -3,6 +3,7 @@ package com.example.spacehunter;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -181,9 +182,30 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 alienStartTime = System.nanoTime();
             }
 
+            // updating our enemy
             for(int i = 0; i < alien.size(); i++) {
                 //update the alien
                 alien.get(i).update();
+
+                // collision with object hero.
+                if(collision(alien.get(i), hero)) {
+                    // remove alien
+                    alien.remove(i);
+
+                    // end game
+                    hero.setPlaying(false);
+
+                    break;
+                } // end of alien hero collision
+
+               for(int j = 0; j < bullet.size(); j++) {
+                   if(collision(alien.get(i), bullet.get(j))) {
+                       alien.remove(i);
+                       bullet.remove(j);
+                       break;
+                   }
+                   bullet.get(j).update();
+               } // end of alien bullet collision
 
                 // remove and alien if it is off the screen.
                 if(alien.get(i).getX() < -25) {
@@ -193,6 +215,18 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             } // end of the enemy
         } // end of if playing
     } // end of GamePanel update()
+
+
+    public boolean collision(GameObject a, GameObject b) {
+        if(Rect.intersects(a.getRectangle(), b.getRectangle())) {
+            return true;
+        }
+        return false;
+    }
+
+
+
+
 
 
 

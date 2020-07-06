@@ -83,17 +83,17 @@ public class Hero extends GameObject { // hero extends the game object class
 
         // now we need to update the hero's movement. acceleration
         if(up) {
-            dy = (int)(dya -= 1.1);
+            dy = (int)(dya -= .7);
         } else {
-            dy = (int)(dya += 1.1);
+            dy = (int)(dya += .7);
         }
 
         // set speed limit
-        if(dy > 6) {
-            dy = 6;
+        if(dy > 3) {
+            dy = 3;
         }
-        if(dy < -6) {
-            dy = -6;
+        if(dy < -3) {
+            dy = -3;
         }
 
         y += dy * 2;
