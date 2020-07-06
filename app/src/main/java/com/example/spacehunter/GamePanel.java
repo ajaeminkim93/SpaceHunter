@@ -54,13 +54,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
 
 
-
-
-    //test
-    private Background bgAlt;
-
     // The thread reference
     private MainThread thread;
+
+
+
+
 
     // GamePanel Constructor
     public GamePanel(Context context) {
@@ -78,8 +77,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         // we will use the callback holder to intercept events.
         getHolder().addCallback(this);
 
-        // creating a new MainThread Object
-        thread = new MainThread(getHolder(), this);
 
         // we will make the GamePanel class' focus to handle events.
         setFocusable(true);
@@ -90,6 +87,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     // This is called immediately after the surface is first created.
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
+
+        // creating a new MainThread Object
+        thread = new MainThread(getHolder(), this);
 
         // create object in surface created.
         bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.backgroundspacee)); // background is our png image.
@@ -110,7 +110,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
         // create borders
         botborder = new ArrayList<Borderbottom>();
-        topborder = new ArrayList<Bordertop>();
+        //topborder = new ArrayList<Bordertop>();
         borderStartTime = System.nanoTime();
 
         // create obstacle
@@ -137,6 +137,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             try {
                 thread.setRunning(false);
                 thread.join();
+                thread = null;
             } catch(InterruptedException e) {
                 e.printStackTrace();
             }
@@ -189,13 +190,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             // bottom border update ===================================================================================
             long borderElapsed = (System.nanoTime()-borderStartTime)/1000000;
 
-            if(borderElapsed >100 ) {
-                botborder.add(new Borderbottom(BitmapFactory.decodeResource(getResources(), R.drawable.borderbottom), WIDTH + 10, ((HEIGHT -80)+rand.nextInt(10))));
+            if(borderElapsed >100 ) {                                                                                                // random y length
+                botborder.add(new Borderbottom(BitmapFactory.decodeResource(getResources(), R.drawable.borderbottom), WIDTH + 10, ((HEIGHT -40)+rand.nextInt(10))));
+                botborder.add(new Borderbottom(BitmapFactory.decodeResource(getResources(), R.drawable.bordertop), WIDTH + 10, ((HEIGHT -600)+rand.nextInt(10))));
                 //topborder.add(new Bordertop(BitmapFactory.decodeResource(getResources(), R.drawable.bordertop), WIDTH + 10, ((HEIGHT -80)+rand.nextInt(10)), HEIGHT));
                 //reset timer
                 borderStartTime = System.nanoTime();
-
-
             }//end if
 
             //loop through every border block and check collision and remove
