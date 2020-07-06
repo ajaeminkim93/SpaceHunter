@@ -19,7 +19,7 @@ public class Enemy extends GameObject {
     private Bitmap spritesheet;
 
 
-    public Enemy(Bitmap ref, int x, int y, int w, int h, int numFrames) {
+    public Enemy(Bitmap res, int x, int y, int w, int h, int s, int numFrames) {
         // super class of GameObject
         super.x = x;
         super.y = y;
@@ -36,12 +36,34 @@ public class Enemy extends GameObject {
         Bitmap[] image = new Bitmap[numFrames];
         spritesheet = res;
 
+        // loop to save all the image frames into out bitmap table.
+        for(int i = 0; i < image.length; i++) {
+            image[i] = Bitmap.createBitmap(spritesheet, i*width, 0, width, height);
+        }
+
+        // now we have all info and can animte.
+        animation.setFrames(image);
+        animation.setDelay(100 - speed);
 
 
 
     } // end of enemy class
 
-    public void update(){}
+    public void update() {
+        x -= speed;
+        animation.update();
+    }
 
-    public void draw(Canvas canvas){}
+    public void draw(Canvas canvas) {
+        try{
+            canvas.drawBitmap(animation.getImage(), x, y, null);
+        } catch (Exception e) {}
+    }
+
+
+    @Override
+    public int getWidth() {
+        return width - 10;
+    }
+
 }

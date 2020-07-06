@@ -10,10 +10,13 @@ import android.view.SurfaceView;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 
 // this is the screen of your device.
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
+
+    private Random rand = new Random();
 
     // Set the screen width and height in our game panel.
     public static final int WIDTH = 856;
@@ -34,6 +37,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     // BULLET VARS:
     private ArrayList<Bullet> bullet;
     private long bulletStartTime;
+
+    // ENEMY
+    private ArrayList<Enemy> alien;
+    private long alienStartTime;
 
 
     //test
@@ -83,6 +90,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         // create bullet array and set timer to system time
         bullet = new ArrayList<Bullet>();
         bulletStartTime = System.nanoTime();
+
+        // create enemy object and set timer to system time
+        alien = new ArrayList<Enemy>();
+        alienStartTime = System.nanoTime();
 
         // start the game loop
         thread.setRunning(true);
@@ -136,7 +147,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             bg.update(); // calls background's update
             hero.update(); // calls hero's update
 
-            // bullet update
+            // bullet update ====================================================================================================
             long bulletTimer = (System.nanoTime() - bulletStartTime)/1000000;
 
             // check the delay among bullets fire from the hero.
@@ -155,9 +166,32 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 if(bullet.get(i).getX()<-10) {
                     bullet.remove(i);
                 }
+            } // end of the bullet
+
+
+            // enemy update ====================================================================================================
+            long alienTimer = (System.nanoTime() - alienStartTime)/1000000;
+
+            // spawn first enemy in 10 seconds and then more often later
+            if(alienTimer > (10000 - hero.getScore()/4)) {
+
+                alien.add(new Enemy(BitmapFactory.decodeResource(getResources(), R.drawable.enemy), WIDTH + 10, (int) (rand.nextDouble() * (HEIGHT - 50)), 40, 60, hero.getScore(), 3));
+
+                // reset timer
+                alienStartTime = System.nanoTime();
             }
 
-        }
+            for(int i = 0; i < alien.size(); i++) {
+                //update the alien
+                alien.get(i).update();
+
+                // remove and alien if it is off the screen.
+                if(alien.get(i).getX() < -25) {
+                    alien.remove(i);
+                    break;
+                }
+            } // end of the enemy
+        } // end of if playing
     } // end of GamePanel update()
 
 
@@ -174,12 +208,23 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         if (canvas != null) {
             final int savedState = canvas.save();
             canvas.scale(scaleFactorX, scaleFactorY);
+
+            // draw background
             bg.draw(canvas);
+
+            // draw hero
             hero.draw(canvas);
 
+            // draw enemy
             for(Bullet fp: bullet) {
                 fp.draw(canvas);
             }
+
+            // draw enemy
+            for(Enemy aln: alien) {
+                aln.draw(canvas);
+            }
+
 
             canvas.restoreToCount(savedState);
         }
