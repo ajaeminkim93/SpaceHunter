@@ -9,6 +9,7 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
 
 
 // this is the screen of your device.
@@ -20,10 +21,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     public static final int MOVESPEED = -5;
 
+
+
+    // BACKGROUND
     // Need reference to the background class so that two classes can communicate.
     private Background bg; // we create the body of the background class inside GamePanel inside surface created method.
+
+    //HERO
     // Need reference to the hero class so that the two classes can communicate.
     private Hero hero;
+
+    // BULLET VARS:
+    private ArrayList<Bullet> bullet;
+    private long bulletStartTime;
 
 
     //test
@@ -70,6 +80,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
         hero = new Hero(BitmapFactory.decodeResource(getResources(), R.drawable.hero), 30, 45, 3);
 
+        // create bullet array and set timer to system time
+        bullet = new ArrayList<Bullet>();
+        bulletStartTime = System.nanoTime();
 
         // start the game loop
         thread.setRunning(true);
@@ -122,6 +135,28 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         if(hero.getPlaying()) {
             bg.update(); // calls background's update
             hero.update(); // calls hero's update
+
+            // bullet update
+            long bulletTimer = (System.nanoTime() - bulletStartTime)/1000000;
+
+            // check the delay among bullets fire from the hero.
+            // simply put when a bullet appears and everysecond our next bullet is faster than the previous one.
+            // ie higher our score, the faster we fire.
+            if(bulletTimer > (2500 - hero.getScore()/4)) {
+                // position the bullet spawn
+                bullet.add(new Bullet((BitmapFactory.decodeResource(getResources(), R.drawable.bullet)), hero.getX() + 60, hero.getY() + 24, 15, 12, 4));
+                bulletStartTime = System.nanoTime();
+            }
+
+            // this is a common for loop to animate and update the frames of the bullet image.
+            for(int i = 0; i < bullet.size(); i++) {
+                bullet.get(i).update();
+                // remove bullet if off the screen.
+                if(bullet.get(i).getX()<-10) {
+                    bullet.remove(i);
+                }
+            }
+
         }
     } // end of GamePanel update()
 
@@ -141,6 +176,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             canvas.scale(scaleFactorX, scaleFactorY);
             bg.draw(canvas);
             hero.draw(canvas);
+
+            for(Bullet fp: bullet) {
+                fp.draw(canvas);
+            }
+
             canvas.restoreToCount(savedState);
         }
 
