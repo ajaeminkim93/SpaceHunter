@@ -1,16 +1,21 @@
 package com.example.spacehunter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import androidx.annotation.ColorLong;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -25,6 +30,34 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     // Set the screen width and height in our game panel.
     public static final int WIDTH = 856;
     public static final int HEIGHT = 480;
+
+    // Bitmap reference to the hearts
+    Bitmap hearta;
+    Bitmap heartb;
+    Bitmap heartc;
+    private int hearts = 3;
+
+    // Bitmap reference to the money
+    Bitmap moneyBonus;
+    public int heroMoney;
+    public long bonusStartTime;
+    private ArrayList<Bonus> myMoney;
+
+
+    // Game Music and Sound
+    MediaPlayer mp;
+    SoundPool coinsound; //coin
+    int coinsoundid;
+    SoundPool bulletfiresound; // bullet
+    int bulletfiresoundid;
+    SoundPool enemydeathsound; // enemy
+    int enemydeathsoundid;
+
+
+    //optionspanel
+    Bitmap myPanel;
+
+
 
     public static final int MOVESPEED = -5;
 
@@ -94,6 +127,24 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
         super(context);
 
+
+        // game music
+        mp = MediaPlayer.create(context, R.raw.arcademusicloop);
+        // coin sound
+        coinsound = new SoundPool(99, AudioManager.STREAM_MUSIC, 1); // audio object
+        coinsoundid = coinsound.load(context, R.raw.pickedcoin, 1); // load the sound
+
+        // enemy sound
+        enemydeathsound = new SoundPool(99, AudioManager.STREAM_MUSIC, 1); // audio object
+        enemydeathsoundid = enemydeathsound.load(context, R.raw.explosion, 1); // load the sound
+
+        // bullet sound
+        bulletfiresound = new SoundPool(99, AudioManager.STREAM_MUSIC, 1); // audio object
+        bulletfiresoundid = bulletfiresound.load(context, R.raw.bulletfire, 1); // load the sound
+
+
+
+
         // we will use the callback holder to intercept events.
         getHolder().addCallback(this);
 
@@ -136,6 +187,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         // create obstacle
         obstacle = new ArrayList<Obstacle>();
         obstacleStartTime = System.nanoTime();
+
+        // create money on screen
+        myMoney = new ArrayList<Bonus>();
+        bonusStartTime = System.nanoTime();
+
 
         // start the game loop
         thread.setRunning(true);
@@ -195,8 +251,41 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     // Update Method.
     public void update() {
         if(hero.getPlaying()) {
+            mp.start();
             bg.update(); // calls background's update
             hero.update(); // calls hero's update
+
+
+            // coin update
+            long bonusTime = (System.nanoTime() - bonusStartTime)/1000000;
+
+            if(bonusTime > (3000 - hero.getScore()/4)) {
+                myMoney.add(new Bonus(BitmapFactory.decodeResource(getResources(), R.drawable.money), WIDTH + 1, (int)(rand.nextDouble() * (HEIGHT -200)), 30, 30, 1));
+                bonusStartTime = System.nanoTime();
+            }// end of if
+
+            for(int i = 0; i < myMoney.size(); i++) {
+                myMoney.get(i).update();
+                // if hero collides wiht coin
+                if(collision(myMoney.get(i), hero)) {
+                    //coin sound
+                    coinsound.play(coinsoundid, 5, 5, 1, 0 , 1);
+
+                    myMoney.remove(i);
+                    heroMoney += 100;
+                    break;
+                }
+
+                // if coin leaves screen
+                if(myMoney.get(i).getX()<-100) {
+                    myMoney.remove(i);
+                    break;
+                }
+            } // end for
+
+
+
+
 
             // obstacle update // bottom border update ===================================================================================
             long obstacleElapsed = (System.nanoTime() - obstacleStartTime)/1000000;
@@ -209,6 +298,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             for(int i = 0; i < obstacle.size(); i++) {
                 obstacle.get(i).update();
                 if(collision(obstacle.get(i), hero)) {
+                    enemydeathsound.play(enemydeathsoundid, 5, 5, 1, 0 , 1);
                     hero.setPlaying(false);
                 }
                 break;
@@ -232,6 +322,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 botborder.get(i).update();
 
                 if (collision(botborder.get(i), hero)) {
+                    enemydeathsound.play(enemydeathsoundid, 5, 5, 1, 0 , 1);
                     hero.setPlaying(false);
                     break;
                 }
@@ -269,6 +360,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             // ie higher our score, the faster we fire.
             if(bulletTimer > (2500 - hero.getScore()/4)) {
                 // position the bullet spawn
+                bulletfiresound.play(bulletfiresoundid, 5, 5, 1, 0 , 1);
                 bullet.add(new Bullet((BitmapFactory.decodeResource(getResources(), R.drawable.bullet)), hero.getX() + 60, hero.getY() + 24, 15, 12, 4));
                 bulletStartTime = System.nanoTime();
             }
@@ -301,11 +393,13 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
                 // collision with object hero.
                 if(collision(alien.get(i), hero)) {
+
                     // remove alien
                     alien.remove(i);
 
+                    hearts--;
                     // end game
-                    hero.setPlaying(false);
+                    //hero.setPlaying(false);
 
                     break;
                 } // end of alien hero collision
@@ -314,6 +408,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                for(int j = 0; j < bullet.size(); j++) {
                    if(collision(alien.get(i), bullet.get(j))) {
 
+                       // enemy death sound
+                       enemydeathsound.play(enemydeathsoundid, 5, 5, 1, 0 , 1);
                        explosion = new Explosion(BitmapFactory.decodeResource(getResources(), R.drawable.explosion), alien.get(i).getX(), alien.get(i).getY(), 125, 100, 12);
 
                        alien.remove(i);
@@ -353,6 +449,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             long resetElapsed = (System.nanoTime() - startReset)/1000000;
 
             if(resetElapsed > 2000 && !newGameCreated) {
+                heroMoney = 0;
                 newGame();
             }
 
@@ -412,10 +509,16 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             for(Borderbottom brb: botborder) {
                 brb.draw(canvas);
             }
+            // mbg is moneybag
+            for(Bonus mbg: myMoney) {
+                mbg.draw(canvas);
+            }
 
             if(started) {
                 explosion.draw(canvas);
             }
+
+
 
             drawText(canvas);
 
@@ -432,6 +535,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         obstacle.clear();
         botborder.clear();
         bullet.clear();
+        myMoney.clear();
+
 
         hero.resetDYA();
         hero.resetScore();
@@ -451,6 +556,53 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         canvas.drawText("Distance: " + (hero.getScore()*2), 10, HEIGHT - 10, paint);
         canvas.drawText("Score: " + best, WIDTH - 215, HEIGHT - 10, paint);
+
+        moneyBonus = BitmapFactory.decodeResource(getResources(), R.drawable.money);
+        canvas.drawBitmap(moneyBonus, 0, 60, null);
+        canvas.drawText("$" + heroMoney, 40, 85, paint);
+
+
+        if(hearts == 3) {
+            hearta = BitmapFactory.decodeResource(getResources(), R.drawable.life);
+            canvas.drawBitmap(hearta, 0, 0, null);
+            heartb = BitmapFactory.decodeResource(getResources(), R.drawable.life);
+            canvas.drawBitmap(heartb, 40, 0, null);
+            heartc = BitmapFactory.decodeResource(getResources(), R.drawable.life);
+            canvas.drawBitmap(heartc, 80, 0, null);
+        }
+        if(hearts == 2) {
+            hearta = BitmapFactory.decodeResource(getResources(), R.drawable.life);
+            canvas.drawBitmap(hearta, 0, 0, null);
+            heartb = BitmapFactory.decodeResource(getResources(), R.drawable.life);
+            canvas.drawBitmap(heartb, 40, 0, null);
+        }
+        if(hearts == 1) {
+            hearta = BitmapFactory.decodeResource(getResources(), R.drawable.life);
+            canvas.drawBitmap(hearta, 0, 0, null);
+        }
+        if(hearts == 0) {
+            hero.setPlaying(false);
+            hearts = 3;
+        }
+
+        // panel of options
+        if(!hero.getPlaying() && newGameCreated && reset) {
+            //create object
+            Paint paint1 = new Paint();
+            paint1.setTextSize(25);
+            paint1.setColor(Color.WHITE);
+            paint1.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+
+            // draw picture
+            myPanel = BitmapFactory.decodeResource(getResources(), R.drawable.options);
+            canvas.drawBitmap(myPanel, WIDTH/2 -200, HEIGHT/2 -120, null);
+
+            canvas.drawText("PRESS TO START", WIDTH/2 - 100, HEIGHT/2, paint1);
+            canvas.drawText("PRESS AND HOLD TO GO UP", WIDTH/2 -160, HEIGHT/2 +40 , paint1);
+            canvas.drawText("RELEASE TO GO DOWN", WIDTH/2 - 120, HEIGHT/2 +80, paint1);
+
+        }
+
 
     } // end of drawText()
 
